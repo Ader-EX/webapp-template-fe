@@ -99,6 +99,20 @@ class ProjectExperienceService {
 
     if (!res.ok) await this.handleResponse(res);
   }
+  async export(): Promise<any> {
+  const res = await fetch(`${this.baseUrl}/export/xlsx`, {
+    method: "GET",
+    headers: this.getAuthHeaders(),
+  });
+
+  const arrayBuffer = await res.arrayBuffer();
+  return {
+    data: new Blob([arrayBuffer], { 
+      type: res.headers.get('content-type') || 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
+    }),
+    headers: Object.fromEntries(res.headers.entries())
+  };
+}
 
   // ---------- HELPERS ----------
   private async handleResponse(response: Response) {

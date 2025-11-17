@@ -9,6 +9,7 @@ import {
   Trash2,
   Loader2,
   Search,
+  Download,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -129,6 +130,25 @@ export default function ProjExperiencePage() {
     }
   };
 
+  async function handleExport() {
+  try {
+    const response = await projectExperienceService.export();
+    const url = window.URL.createObjectURL(response.data);
+    const link = document.createElement("a");
+    link.href = url;
+    const fileName =
+      response.headers["content-disposition"]?.split("filename=")[1] ??
+      "export.xlsx";
+    link.setAttribute("download", fileName.replace(/"/g, ""));
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    toast.success("Data berhasil di-download");
+  } catch (err: any) {
+    toast.error(err.message || "Gagal melakukan export");
+  }
+}
+
   return (
     <div className="flex w-full flex-1">
       <div className="flex flex-1 flex-col space-y-6">
@@ -175,9 +195,16 @@ export default function ProjExperiencePage() {
                   className="pl-7 w-full"
                 />
               </div>
+              <div className="flex flex-row gap-2"></div>
               <Button onClick={handleSearch} disabled={loading}>
                 <SearchIcon className="mr-2 h-4 w-4" /> Cari
               </Button>
+               <Button variant={"outline"} onClick={handleExport} disabled={loading}>
+
+                <Download className="mr-2 h-4 w-4" /> Export XLSX
+              </Button>
+
+              
             </div>
      
         {/* Table */}
