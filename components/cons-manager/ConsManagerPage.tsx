@@ -42,11 +42,13 @@ import GlobalPaginationFunction from "@/components/pagination-global";
 
 import toast from "react-hot-toast";
 
-import { userService, UserIn, UserOut } from "@/services/userService";
-import UserMgmtForm from "@/components/user/UserMgmtForm";
 
-export default function UsersPage() {
-  const [users, setUsers] = useState<UserIn[]>([]);
+import UserMgmtForm from "@/components/user/UserMgmtForm";
+import { ConsultingManager, ConsultingManagerInput, consultingManagerService } from "@/services/consManagerService";
+import ConsultingManagerForm from "./ConsMgmtForm";
+
+export default function ConsultingManagerPage() {
+  const [users, setUsers] = useState<ConsultingManager[]>([]);
   const [total, setTotal] = useState(0);
 
   const [loading, setLoading] = useState(true);
@@ -64,7 +66,7 @@ export default function UsersPage() {
   const fetchUsers = async (pageNumber: number, query: string, limit: number) => {
     setLoading(true);
     try {
-      const response = await userService.getAllUsers({
+      const response = await consultingManagerService.getAll({
         skip: (pageNumber - 1) * limit,
         limit,
         search: query,
@@ -90,14 +92,14 @@ export default function UsersPage() {
     fetchUsers(1, searchTerm, rowsPerPage);
   };
 
-  const openEdit = (user: UserIn) => {
+  const openEdit = (user: ConsultingManagerInput) => {
     setEditing(user);
     setIsDialogOpen(true);
   };
 
   const handleDelete = async (id: number) => {
     try {
-      await userService.deleteUser(id);
+      await consultingManagerService.delete(id);
       await fetchUsers(page, searchTerm, rowsPerPage);
       toast.success("User berhasil dihapus!");
     } catch (error) {
@@ -105,15 +107,15 @@ export default function UsersPage() {
     }
   };
 
-  const handleSubmit = async (data: UserOut) => {
+  const handleSubmit = async (data: ConsultingManagerInput) => {
     setSubmitting(true);
     try {
       if (editing) {
-        await userService.updateUser(editing.id, data);
-        toast.success("User diperbarui!");
+        await consultingManagerService.update(editing.id, data);
+        toast.success("Manager diperbarui!");
       } else {
-        await userService.createUser(data);
-        toast.success("User dibuat!");
+        await consultingManagerService.create(data);
+        toast.success("Manager dibuat!");
       }
 
       setIsDialogOpen(false);
@@ -132,25 +134,25 @@ export default function UsersPage() {
       <div className="flex flex-1 flex-col space-y-6">
         <SidebarHeaderBar
           showToggle={true}
-          title="User Management"
+          title="Consulting Manager Management"
           
           rightContent={
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
               <DialogTrigger asChild>
                 <Button onClick={() => setIsDialogOpen(true)}>
                   <Plus className="mr-2 h-4 w-4" />
-                  Tambah User
+                  Tambah Manager
                 </Button>
               </DialogTrigger>
 
               <DialogContent>
                 <DialogHeader>
                   <DialogTitle>
-                    {editing ? "Edit User" : "Tambah User Baru"}
+                    {editing ? "Edit Manager" : "Tambah Manager Baru"}
                   </DialogTitle>
                 </DialogHeader>
 
-                <UserMgmtForm
+                <ConsultingManagerForm
                   initialData={editing ?? undefined}
                   editing={!!editing}
                   onSubmit={handleSubmit}
@@ -166,7 +168,7 @@ export default function UsersPage() {
               <div className="relative max-w-sm">
                 <Search className="absolute left-2 top-1/2 -translate-y-1/2 text-muted-foreground h-4 w-4" />
                 <Input
-                  placeholder="Cari user..."
+                  placeholder="Cari manager..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && handleSearch()}
@@ -182,8 +184,7 @@ export default function UsersPage() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>ID</TableHead>
-              <TableHead>Username</TableHead>
+            
                <TableHead>Nama</TableHead>
               <TableHead>Email</TableHead>
               <TableHead>Departemen</TableHead>
@@ -201,15 +202,13 @@ export default function UsersPage() {
             ) : users.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={5} className="text-center py-8">
-                  Tidak ada user
+                  Tidak ada manager terdaftar
                 </TableCell>
               </TableRow>
             ) : (
-              users.map((u: UserIn) => (
-                <TableRow key={u.id}>
-                  <TableCell>{u.id}</TableCell>
-                     <TableCell>{u.name}</TableCell>
-                  <TableCell>{u.username}</TableCell>
+              users.map((u: ConsultingManager, index) => (
+                <TableRow key={index}>
+                <TableCell>{u.name}</TableCell>
                   <TableCell>{u.email}</TableCell>
                   <TableCell>{u.department_name}</TableCell>
                   <TableCell className="text-right">

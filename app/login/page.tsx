@@ -51,7 +51,7 @@ const LoginPage = () => {
                 Cookies.set("name", name);
                 Cookies.set("role", role);
                 Cookies.set("refresh_token", refresh_token);
-                router.push("/dashboard");
+                router.push("/users");
             } else {
                 toast.dismiss(loadingToast);
                 toast.error(detail || "Login gagal, silahkan coba lagi nanti");

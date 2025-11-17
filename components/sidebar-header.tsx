@@ -17,7 +17,7 @@ export function SidebarHeader({open = true}: { open: boolean }) {
 
             {open && (
                 <div className="flex items-center">
-          <span className="text-lg font-bold text-sidebar-foreground">
+          <span className="text-md font-bold text-sidebar-foreground">
             MANAGEMENT APP
           </span>
                 </div>

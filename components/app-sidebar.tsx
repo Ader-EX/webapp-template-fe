@@ -20,7 +20,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     { title: "Users", url: "/users", icon: Users },
     { title: "Consulting Manager", url: "/consulting-manager", icon: Briefcase },
     { title: "Project Experience", url: "/project-experience", icon: FileText },
-    // { title: "Settings", url: "/settings", icon: Settings },s
   ];
 
   const user = {
