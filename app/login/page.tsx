@@ -1,0 +1,148 @@
+"use client";
+import {Card} from "@/components/ui/card";
+import {Input} from "@/components/ui/input";
+import Image from "next/image";
+import React, {useState} from "react";
+
+import Cookies from "js-cookie";
+import {Button} from "@/components/ui/button";
+import {Label} from "@/components/ui/label";
+import axios from "axios";
+import {EyeIcon, EyeOffIcon, Loader2} from "lucide-react";
+
+import {useForm} from "react-hook-form";
+
+import toast from "react-hot-toast";
+import {useRouter} from "next/navigation";
+
+const LoginPage = () => {
+    const [showPassword, setShowPassword] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
+
+    const {
+        register,
+        handleSubmit,
+        formState: {errors},
+    } = useForm();
+
+    const router = useRouter();
+
+    const onSubmit = async (data: any) => {
+        setIsLoading(true);
+
+        const loadingToast = toast.loading("Sedang login...");
+
+        try {
+            const response = await axios.post(
+                `${process.env.NEXT_PUBLIC_API_URL}/users/login`,
+                {
+                    username: data.username,
+                    password: data.password,
+                }
+            );
+
+            const {access_token, role, name, refresh_token, detail} = response.data;
+
+            if (access_token && refresh_token) {
+                toast.dismiss(loadingToast);
+                toast.success("Login berhasil!");
+
+                Cookies.set("access_token", access_token);
+                Cookies.set("name", name);
+                Cookies.set("role", role);
+                Cookies.set("refresh_token", refresh_token);
+                router.push("/dashboard");
+            } else {
+                toast.dismiss(loadingToast);
+                toast.error(detail || "Login gagal, silahkan coba lagi nanti");
+            }
+        } catch (error: any) {
+            toast.dismiss(loadingToast);
+            const message =
+                error.response?.data?.detail || "Login gagal, silahkan coba lagi";
+            toast.error(message);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    return (
+        <section>
+            <div className="flex flex-col items-center justify-center px-6 py-8 mx-auto md:h-screen lg:py-0">
+                <Card className="w-full bg-white rounded-lg shadow dark:border md:mt-0 sm:max-w-md xl:p-0 ">
+                    <div className="p-6 space-y-2 md:space-y-2 sm:p-8">
+                      
+                        <h1 className="text-xl font-bold leading-tight tracking-tight text-gray-900 md:text-2xl dark:text-white">
+                            Selamat Datang
+                        </h1>
+                        <p className="text-black/60">Login untuk mengakses Web App</p>
+                        <form
+                            className="space-y-4 md:space-y-6"
+                            onSubmit={handleSubmit(onSubmit)}
+                        >
+                            <div>
+                                <label
+                                    htmlFor="username"
+                                    className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                                >
+                                    Username
+                                </label>
+                                <Input
+                                    type="text"
+                                    id="username"
+                                    {...register("username", {required: true})}
+                                    className="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                                    placeholder="Masukkan Username"
+                                    disabled={isLoading}
+                                />
+                            </div>
+                            <div>
+                                <div className="grid gap-3">
+                                    <Label htmlFor="password">Password</Label>
+                                    <div className="relative">
+                                        <Input
+                                            id="password"
+                                            {...register("password", {required: true})}
+                                            type={showPassword ? `text` : `password`}
+                                            placeholder="*******"
+                                            disabled={isLoading}
+                                        />
+                                        <div
+                                            onClick={() => !isLoading && setShowPassword(!showPassword)}
+                                            className={`absolute right-4 bottom-2 cursor-pointer hover:scale-[105%] focus:text ${
+                                                isLoading ? 'opacity-50 cursor-not-allowed' : ''
+                                            }`}
+                                        >
+                                            {!showPassword ? (
+                                                <EyeIcon className="size-5"/>
+                                            ) : (
+                                                <EyeOffIcon className="size-5"/>
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <Button
+                                type="submit"
+                                className="flex w-full"
+                                disabled={isLoading}
+                            >
+                                {isLoading ? (
+                                    <>
+                                        <Loader2 className="mr-2 h-4 w-4 animate-spin"/>
+                                        Sedang masuk...
+                                    </>
+                                ) : (
+                                    'Masuk'
+                                )}
+                            </Button>
+                        </form>
+                    </div>
+                </Card>
+            </div>
+        </section>
+    );
+};
+
+export default LoginPage;
